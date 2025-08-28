@@ -1,0 +1,47 @@
+name: Jenkins Restore
+
+on:
+  workflow_dispatch: # manual trigger only (you don’t want this auto-running)
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup SSH Agent
+      uses: webfactory/ssh-agent@v0.9.1
+      with:
+        ssh-private-key: ${{ secrets.JENKINS_SSH_KEY }}
+
+    - name: Restore Jenkins from S3 Backup
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.JENKINS_USER }}@${{ secrets.JENKINS_SERVER }} << 'EOF'
+          set -e
+          
+          JENKINS_HOME="/var/lib/jenkins"
+          S3_BUCKET="project-jenkins-backup"
+
+          echo ">>> Stopping Jenkins service..."
+          sudo systemctl stop jenkins
+
+          echo ">>> Finding latest backup in S3..."
+          LATEST_BACKUP=$(aws s3 ls s3://$S3_BUCKET/ --recursive | sort | tail -n 1 | awk '{print $4}')
+
+          echo ">>> Downloading backup: $LATEST_BACKUP"
+          aws s3 cp s3://$S3_BUCKET/$LATEST_BACKUP /tmp/jenkins-restore.tar.gz
+
+          echo ">>> Clearing old Jenkins data..."
+          sudo rm -rf $JENKINS_HOME/*
+
+          echo ">>> Restoring Jenkins data..."
+          sudo tar -xzf /tmp/jenkins-restore.tar.gz -C $JENKINS_HOME
+          sudo chown -R jenkins:jenkins $JENKINS_HOME
+
+          echo ">>> Starting Jenkins service..."
+          sudo systemctl start jenkins
+
+          echo ">>> Restore completed successfully!"
+        EOF
