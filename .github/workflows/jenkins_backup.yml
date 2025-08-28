@@ -18,5 +18,5 @@ jobs:
 
     - name: Run Jenkins Backup Script via SSH
       run: |
-        ssh -o StrictHostKeyChecking=no root@${{ secrets.JENKINS_USER }}@${{ secrets.JENKINS_SERVER }} \
+        ssh -o StrictHostKeyChecking=no ${{ secrets.JENKINS_USER }}@${{ secrets.JENKINS_SERVER }} \
         "/usr/local/bin/jenkins_backup.sh"
