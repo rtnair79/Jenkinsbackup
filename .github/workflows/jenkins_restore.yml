@@ -22,7 +22,7 @@ jobs:
           set -e
           
           JENKINS_HOME="/var/lib/jenkins"
-          S3_BUCKET="project-jenkins-backup"
+          S3_BUCKET="rajatn-project1-jenkins-backup"
 
           echo ">>> Stopping Jenkins service..."
           sudo systemctl stop jenkins
