@@ -1,9 +1,9 @@
 name: Jenkins Backup
 
-on:
-  schedule:
-    - cron: "5 * * * *"
-  workflow_dispatch: # Manual trigger, you can also use schedule
+#on:
+#  schedule:
+#    - cron: "5 * * * *"
+#  workflow_dispatch: # Manual trigger, you can also use schedule
 
 jobs:
   backup:
